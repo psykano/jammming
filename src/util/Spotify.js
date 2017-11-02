@@ -28,6 +28,28 @@ const Spotify = {
       const redirectUrl = 'https://accounts.spotify.com/authorize?client_id=' + Config.clientId + '&response_type=token&scope=playlist-modify-public&redirect_uri=' + Config.redirectUri;
       window.location = redirectUrl;
     }
+  },
+
+  search(term) {
+    const searchUrl = 'https://api.spotify.com/v1/search?type=track&q=' + term;
+    const accessToken = Spotify.getAccessToken();
+    const authorization = {
+      headers: {Authorization: `Bearer ${accessToken}`}
+    };
+    return fetch(searchUrl, authorization).then(response => {
+      return response.json();
+    }).then(response => {
+      if (!response.tracks) {
+        return [];
+      }
+      return response.tracks.items.map(track => ({
+        id: track.id,
+        name: track.name,
+        artist: track.artists[0].name,
+        album: track.album.name,
+        uri: track.uri
+      }));
+    });
   }
 };
 
