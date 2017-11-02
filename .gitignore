@@ -21,4 +21,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # private info
-config.js
+Config.js
