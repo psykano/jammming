@@ -8,16 +8,11 @@ import Spotify from '../../util/Spotify';
 class App extends Component {
   constructor(props) {
     super(props);
+    this.defaultPlaylistName = 'New Playlist';
     this.state = {
-      searchResults: [
-        { id:2, name: 'name1', artist: 'artist1', album: 'album1' },
-        { id:3, name: 'name2', artist: 'artist2', album: 'album2' }
-      ],
-      playlistName: 'playlist1',
-      playlistTracks: [
-        { id:0, name: 'plname1', artist: 'plartist1', album: 'plalbum1' },
-        { id:1, name: 'plname2', artist: 'plartist2', album: 'plalbum2' }
-      ]
+      searchResults: [],
+      playlistName: this.defaultPlaylistName,
+      playlistTracks: []
     };
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -44,7 +39,13 @@ class App extends Component {
   }
 
   savePlaylist() {
-    // TODO
+    const trackUris = this.state.playlistTracks.map(track => track.uri);
+    Spotify.savePlaylist(this.state.playlistName, trackUris).then(() => {
+      this.setState({
+        playlistName: this.defaultPlaylistName,
+        playlistTracks: []
+      });
+    });
   }
 
   search(term) {

@@ -38,17 +38,49 @@ const Spotify = {
     };
     return fetch(searchUrl, authorization).then(response => {
       return response.json();
-    }).then(response => {
-      if (!response.tracks) {
+    }).then(json => {
+      if (!json.tracks) {
         return [];
       }
-      return response.tracks.items.map(track => ({
+      return json.tracks.items.map(track => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0].name,
         album: track.album.name,
         uri: track.uri
       }));
+    });
+  },
+
+  savePlaylist(name, trackUris) {
+    if (!name || !trackUris || !trackUris.length) {
+      return;
+    }
+
+    const accessToken = Spotify.getAccessToken();
+    const headers = {Authorization: `Bearer ${accessToken}`};
+    let userId;
+
+    const usernameUrl = 'https://api.spotify.com/v1/me';
+    return fetch(usernameUrl, {headers: headers}).then(response => {
+      return response.json();
+    }).then(json => {
+      userId = json.id;
+      const playlistsUrl = 'https://api.spotify.com/v1/users/' + userId + '/playlists';
+      return fetch(playlistsUrl, {
+        headers: headers,
+        method: 'POST',
+        body: JSON.stringify({name: name})
+      }).then(response => {
+        return response.json();
+      }).then(json => {
+        const tracksUrl = 'https://api.spotify.com/v1/users/' + userId + '/playlists/' + json.id + '/tracks';
+        return fetch(tracksUrl, {
+          headers: headers,
+          method: 'POST',
+          body: JSON.stringify({uris: trackUris})
+        });
+      });
     });
   }
 };
